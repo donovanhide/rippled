@@ -19,13 +19,13 @@
 
 #include <memory>
 #include <vector>
+#include <beast/cxx14/memory.h>
 
 // backend support
 #include <ripple/unity/leveldb.h>
 #include <ripple/unity/hyperleveldb.h>
 #include <ripple/unity/rocksdb.h>
-
-#include <beast/cxx14/memory.h>
+#include <ripple/unity/keyvadb.h>
 
 #include <ripple/basics/seconds_clock.h>
 #include <ripple/basics/TaggedCache.h>
@@ -47,6 +47,8 @@
 #include <ripple/nodestore/backend/RocksDBFactory.cpp>
 #include <ripple/nodestore/backend/RocksDBQuickFactory.h>
 #include <ripple/nodestore/backend/RocksDBQuickFactory.cpp>
+#include <ripple/nodestore/backend/KeyvaDBFactory.h>
+#include <ripple/nodestore/backend/KeyvaDBFactory.cpp>
 
 #include <ripple/nodestore/impl/Backend.cpp>
 #include <ripple/nodestore/impl/BatchWriter.cpp>

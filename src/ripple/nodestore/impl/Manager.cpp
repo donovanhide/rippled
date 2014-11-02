@@ -65,6 +65,10 @@ public:
         add_factory (make_RocksDBFactory ());
         add_factory (make_RocksDBQuickFactory ());
     #endif
+
+    #if RIPPLE_KEYVADB_AVAILABLE
+        add_factory (make_KeyvaDBFactory ());
+    #endif
     }
 
     Factory*

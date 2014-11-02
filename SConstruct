@@ -599,6 +599,7 @@ for toolchain in all_toolchains:
                 'src/leveldb/include',
                 #'src/hyperleveldb/include', # hyper
                 'src/rocksdb2/include',
+                'src/keyvadb'
             ]
         )
 
