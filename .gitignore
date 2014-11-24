@@ -1,0 +1,10 @@
+*.o
+keyvadb.sublime-project
+keyvadb.sublime-workspace
+keyvadb_unittests
+*.plist
+kvd
+*.keys
+*.values
+dump
+keyvadb
