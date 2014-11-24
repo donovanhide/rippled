@@ -190,6 +190,10 @@ public:
         testNodeStore ("rocksdb", useEphemeralDatabase, true, seedValue);
     #endif
 
+    #if RIPPLE_KEYVADB_AVAILABLE
+        testNodeStore ("keyvadb", useEphemeralDatabase, true, seedValue);
+    #endif
+
     #if RIPPLE_ENABLE_SQLITE_BACKEND_TESTS
         testNodeStore ("sqlite", useEphemeralDatabase, true, seedValue);
     #endif
@@ -203,6 +207,10 @@ public:
 
     #if RIPPLE_ROCKSDB_AVAILABLE
         testImport ("rocksdb", "rocksdb", seedValue);
+    #endif
+
+    #if RIPPLE_KEYVADB_AVAILABLE
+        testImport ("keyvadb", "keyvadb", seedValue);
     #endif
 
     #if RIPPLE_HYPERLEVELDB_AVAILABLE

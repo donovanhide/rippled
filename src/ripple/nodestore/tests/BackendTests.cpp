@@ -105,6 +105,10 @@ public:
     #if RIPPLE_ROCKSDB_AVAILABLE
         testBackend ("rocksdb", seedValue);
     #endif
+
+    #if RIPPLE_KEYVADB_AVAILABLE
+        testBackend ("keyvadb", seedValue);
+    #endif
     }
 };
 
