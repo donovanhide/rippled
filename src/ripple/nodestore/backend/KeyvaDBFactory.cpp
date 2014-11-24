@@ -35,10 +35,7 @@ class KeyvaDBBackend : public Backend,
     Scheduler& m_scheduler;
     BatchWriter m_batch;
     std::string m_name;
-    // std::unique_ptr<
-    //     keyvadb::DB<keyvadb::FileStoragePolicy<256>, keyvadb::StandardLog>>
-    //     m_db;
-    std::unique_ptr<keyvadb::DB<keyvadb::FileStoragePolicy<256>>> m_db;
+    std::unique_ptr<keyvadb::DB<256, keyvadb::StandardLog>> m_db;
 
     KeyvaDBBackend(int keyBytes, Parameters const& keyValues,
                    Scheduler& scheduler, beast::Journal journal)
@@ -51,23 +48,23 @@ class KeyvaDBBackend : public Backend,
         if (m_name.empty())
             throw std::runtime_error("Missing path in KeyvaDBFactory backend");
 
-        std::uint32_t block_size = 4096;
+        beast::File path(m_name);
+        path.createDirectory();
+
+        keyvadb::Options options;
+        options.keyFileName = m_name + "/db.keys";
+        options.valueFileName = m_name + "/db.values";
+
         if (!keyValues["block_size"].isEmpty())
         {
-            block_size = keyValues["block_size"].getIntValue();
+            options.blockSize = keyValues["block_size"].getIntValue();
         }
-        std::uint64_t cache_size = (1024 * 1024 * 1024) / block_size;  // 1 GB
         if (!keyValues["cache_size"].isEmpty())
         {
-            cache_size = keyValues["cache_size"].getIntValue();
+            options.cacheSize = keyValues["cache_size"].getIntValue();
         }
-        // m_db = std::make_unique<
-        //     keyvadb::DB<keyvadb::FileStoragePolicy<256>,
-        //     keyvadb::StandardLog>>(
-        //     m_name + "db.keys", m_name + "db.values", block_size,
-        //     cache_size);
-        m_db = std::make_unique<keyvadb::DB<keyvadb::FileStoragePolicy<256>>>(
-            m_name + "db.keys", m_name + "db.values", block_size, cache_size);
+        m_db =
+            std::make_unique<keyvadb::DB<256, keyvadb::StandardLog>>(options);
         if (auto err = m_db->Open())
             throw std::runtime_error(
                 std::string("Unable to open/create keyvadb: ") + err.message());
@@ -81,7 +78,7 @@ class KeyvaDBBackend : public Backend,
     {
         pObject->reset();
         std::string value;
-        std::string k(std::string(static_cast<char const*>(key), m_keyBytes));
+        std::string k(static_cast<char const*>(key), m_keyBytes);
         auto err = m_db->Get(k, &value);
         if (err == keyvadb::db_error::key_not_found ||
             err == keyvadb::db_error::value_not_found)
@@ -90,7 +87,14 @@ class KeyvaDBBackend : public Backend,
             return Status(unknown);
         DecodedBlob decoded(key, value.data(), value.size());
         if (!decoded.wasOk())
+        {
+            if (m_journal.fatal)
+                m_journal.fatal << "Corrupt NodeObject #"
+                                << strHex(k.data(), k.size()) << ":"
+                                << value.size() << ":"
+                                << strHex(value.data(), value.size());
             return Status(dataCorrupt);
+        }
         *pObject = decoded.createObject();
         return Status(ok);
     }
